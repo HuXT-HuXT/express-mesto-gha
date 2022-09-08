@@ -6,13 +6,16 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      res.status(OK).send(user)
+      const { name, about, avatar, _id } = user;
+      res.status(OK).send({ name, about, avatar, _id })
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
         res.status(INPUT_DATA_ERROR).send({ message: "Переданы некорректные данные при создании пользователя." })
-      }
-      handleError(req, res)})
+      } else {
+      handleError(req, res)
+    }
+  })
 }
 //Read all users
 const getUsers = (req, res) => {
