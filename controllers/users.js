@@ -30,13 +30,12 @@ const getUsers = (req, res) => {
     .catch(err => handleError(req, res))
 }
 //Read current user
-const getUser = (req, res) => {
-  console.log(user)
+const getUserById = (req, res) => {
   User.findById(req.params.id)
   .then((user) => {
     if (user) {
       const { name, about, avatar, _id } = user
-      res.status(OK).send({ name, about, avatar, _id })
+      res.status(OK).send(user)
     } else {
       res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
     }
@@ -101,7 +100,7 @@ const updateAvatar = (req, res) => {
 
 module.exports = {
   createUser,
-  getUser,
+  getUserById,
   getUsers,
   updateUser,
   updateAvatar
