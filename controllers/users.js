@@ -34,7 +34,6 @@ const getUserById = (req, res) => {
   User.findById(req.params.id)
   .then((user) => {
     if (user) {
-      const { name, about, avatar, _id } = user
       res.status(OK).send(user)
     } else {
       res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
