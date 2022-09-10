@@ -34,17 +34,17 @@ const removeCard = (req, res) => {
   if (mongoose.Types.ObjectId.isValid(req.params.cardId)) {
     Card.findByIdAndRemove(req.params.cardId)
       .then((card) => {
+        console.log(card)
         if (card) {
-          res.status(OK).send(card)
+          res.status(OK).send({ message: `Карточка ${req.params.cardId} была удалена.` })
         } else {
-          res.status(DATABASE_ERROR).send({ message: "Карточка не найдены." })
+          res.status(DATABASE_ERROR).send({ message: "Карточка не найдена." })
         }
       })
       .catch(err => handleError(req, res))
     } else {
       res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
     }
-
 }
 
 const likeCard = ((req, res) => {
