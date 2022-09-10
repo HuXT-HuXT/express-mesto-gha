@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const mongoose = require('mongoose');
 const { OK, INPUT_DATA_ERROR, DATABASE_ERROR, handleError } = require('../constants/constants')
 
 const createCard = (req, res) => {
@@ -30,48 +31,60 @@ const readCards = (req, res) => {
 }
 
 const removeCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-  .then((card) => {
-    if (card) {
-      res.status(OK).send(card)
+  if (mongoose.Types.ObjectId.isValid(req.params.cardId)) {
+    Card.findByIdAndRemove(req.params.cardId)
+      .then((card) => {
+        if (card) {
+          res.status(OK).send(card)
+        } else {
+          res.status(DATABASE_ERROR).send({ message: "Карточка не найдены." })
+        }
+      })
+      .catch(err => handleError(req, res))
     } else {
-      res.status(DATABASE_ERROR).send({c})
+      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
     }
-  })
-    .catch(err => handleError(req, res))
 
 }
 
 const likeCard = ((req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(
-    cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true })
-    .then((card) => {
-      if (card) {
-        res.status(OK).send(card)
-      } else {
-        res.status(DATABASE_ERROR).send({ message: `Карточка с указанным ${cardId} не найдена.` })
-      }
-    })
-    .catch(err => handleError(req, res))
+  if (mongoose.Types.ObjectId.isValid(cardId)) {
+    Card.findByIdAndUpdate(
+      cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true })
+      .then((card) => {
+        if (card) {
+          res.status(OK).send(card)
+        } else {
+          res.status(DATABASE_ERROR).send({ message: `Карточка с указанным ${cardId} не найдена.` })
+        }
+      })
+      .catch(err => handleError(req, res))
+    } else {
+      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
+    }
 })
 
 const dislikeCard = ((req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(
-    cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true })
-    .then((card) => {
-      if (card) {
-        res.status(OK).send(card)
-      } else {
-        res.status(DATABASE_ERROR).send({ message: `Карточка с указанным ${cardId} не найдена.` })
-      }
-    })
-    .catch(err => handleError(req, res))
+  if (mongoose.Types.ObjectId.isValid(cardId)) {
+    Card.findByIdAndUpdate(
+      cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true })
+      .then((card) => {
+        if (card) {
+          res.status(OK).send(card)
+        } else {
+          res.status(DATABASE_ERROR).send({ message: `Карточка с указанным ${cardId} не найдена.` })
+        }
+      })
+      .catch(err => handleError(req, res))
+    } else {
+      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
+    }
 })
 
 module.exports = {
