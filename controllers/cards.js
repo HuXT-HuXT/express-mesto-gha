@@ -34,7 +34,6 @@ const removeCard = (req, res) => {
   if (mongoose.Types.ObjectId.isValid(req.params.cardId)) {
     Card.findByIdAndRemove(req.params.cardId)
       .then((card) => {
-        console.log(card)
         if (card) {
           res.status(OK).send({ message: `Карточка ${req.params.cardId} была удалена.` })
         } else {
