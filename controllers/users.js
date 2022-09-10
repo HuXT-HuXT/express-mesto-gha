@@ -58,9 +58,10 @@ const updateUser = (req, res) => {
       if (user) {
         const { name, about, avatar, _id } = user
         res.status(OK).send({ name, about, avatar, _id })
+      } else {
+        res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
       }
     })
-    .orFail(() => res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`}))
     .catch(err => {
       if (err.name === "ValidationError") {
         res.status(INPUT_DATA_ERROR).send({message: "Переданы некорректные данные при создании пользователя. "})

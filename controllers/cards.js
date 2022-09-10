@@ -42,7 +42,7 @@ const removeCard = (req, res) => {
       })
       .catch(err => handleError(req, res))
     } else {
-      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
+      res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
     }
 
 }
@@ -63,7 +63,7 @@ const likeCard = ((req, res) => {
       })
       .catch(err => handleError(req, res))
     } else {
-      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
+      res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
     }
 })
 
@@ -83,7 +83,7 @@ const dislikeCard = ((req, res) => {
       })
       .catch(err => handleError(req, res))
     } else {
-      res.status(DATABASE_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
+      res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${cardId}.` })
     }
 })
 
