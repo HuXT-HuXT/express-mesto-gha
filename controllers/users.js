@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../models/user')
 const { OK, INPUT_DATA_ERROR, DATABASE_ERROR, DEFAULT_ERROR, handleError } = require('../constants/constants');
 
@@ -31,16 +32,19 @@ const getUsers = (req, res) => {
 }
 //Read current user
 const getUserById = (req, res) => {
-  console.log(User);
-  User.findById(req.params.id)
-  .then((user) => {
-    if (user) {
-      res.status(OK).send(user)
-    } else {
-      res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
-    }
-  })
-  .catch(err => handleError(req, res))
+  if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+    User.findById(req.params.id)
+      .then((user) => {
+        if (user) {
+          res.status(OK).send(user)
+        } else {
+          res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
+        }
+      })
+      .catch(err => handleError(req, res))
+  } else {
+    res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
+  }
 }
 //Update name/ about
 const updateUser = (req, res) => {

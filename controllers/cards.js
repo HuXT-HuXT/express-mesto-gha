@@ -1,5 +1,5 @@
-const Card = require('../models/card');
 const mongoose = require('mongoose');
+const Card = require('../models/card');
 const { OK, INPUT_DATA_ERROR, DATABASE_ERROR, handleError } = require('../constants/constants')
 
 const createCard = (req, res) => {
