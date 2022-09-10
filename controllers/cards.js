@@ -20,9 +20,9 @@ const createCard = (req, res) => {
 
 const readCards = (req, res) => {
   Card.find({})
-    .then((cards) => {
-      if (cards.length !== 0) {
-        res.status(OK).send(cards)
+    .then((card) => {
+      if (card.length !== 0) {
+        res.status(OK).send(card)
       } else {
         res.status(DATABASE_ERROR).send({ message: "Карточки не найдены." })
       }
