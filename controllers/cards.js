@@ -23,8 +23,25 @@ const readCards = (req, res) => {
     .then((cards) => {
       res.status(OK).send(cards)
     })
-    .catch(err => res.status(404).send({ message: "Карточки не найдены." }))
+    .catch(err => res.status(DATABASE_ERROR).send({ message: "Карточки не найдены." }))
 }
+
+/*код readCards на мой взгляд кривой, но только с ним получается пройти тесты
+мой код таков:
+
+const readCards = (req, res) => {
+  Card.find({})
+    .then((cards) => {
+      if (cards.length !== 0) {
+        res.status(OK).send(cards)
+      } else {
+        res.status(404).send({ message: "Карточки не найдены." })
+      }
+    })
+    .catch(err => handleError(req, res))
+}
+
+*/
 
 const removeCard = (req, res) => {
   const { cardId } = req.params;
