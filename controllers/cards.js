@@ -21,13 +21,9 @@ const createCard = (req, res) => {
 const readCards = (req, res) => {
   Card.find({})
     .then((cards) => {
-      if (cards.length !== 0) {
-        res.status(OK).send(cards)
-      } else {
-        res.status(404).send({ message: "Карточки не найдены." })
-      }
+      res.status(OK).send(cards)
     })
-    .catch(err => handleError(req, res))
+    .catch(err => res.status(404).send({ message: "Карточки не найдены." }))
 }
 
 const removeCard = (req, res) => {
