@@ -21,10 +21,10 @@ const createCard = (req, res) => {
 const readCards = (req, res) => {
   Card.find({})
     .then((cards) => {
-      if (cards.length === 0) {
-        res.status(DATABASE_ERROR).send({ message: "Карточки не найдены." })
-      } else {
+      if (cards.length !== 0) {
         res.status(OK).send(cards)
+      } else {
+        res.status(DATABASE_ERROR).send({ message: "Карточки не найдены." })
       }
     })
     .catch(err => handleError(req, res))
@@ -42,7 +42,7 @@ const removeCard = (req, res) => {
       })
       .catch(err => handleError(req, res))
     } else {
-      res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
+      res.status(DATABASE_ERROR).send({ message: "Карточка не найдена." })
     }
 }
 
