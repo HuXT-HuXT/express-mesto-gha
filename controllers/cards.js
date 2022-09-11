@@ -44,24 +44,19 @@ const readCards = (req, res) => {
 */
 
 const removeCard = (req, res) => {
-  const { cardId } = req.params;
-  Card.findById(cardId)
-  .orFail(() => {
-    const error = new Error('Нет карточки по заданному id');
-    error.statusCode = 404;
-    throw error;
-  })
-  .then((card) => Card.deleteOne(card)
-    .then(() => res.send({ data: card })))
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Невалидный идентификатор карточки' });
-    } else if (err.statusCode === 404) {
-      res.status(404).send({ message: err.message });
+  if (mongoose.Types.ObjectId.isValid(req.params.cardId)) {
+    Card.findByIdAndRemove(req.params.cardId)
+      .then((card) => {
+        if (card) {
+          res.status(OK).send({ message: `Карточка ${req.params.cardId} была удалена.` })
+        } else {
+          res.status(DATABASE_ERROR).send({ message: "Карточка не найдена." })
+        }
+      })
+      .catch(err => handleError(req, res))
     } else {
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
     }
-  });
 }
 
 const likeCard = ((req, res) => {
