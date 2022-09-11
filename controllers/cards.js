@@ -24,7 +24,7 @@ const readCards = (req, res) => {
       if (cards.length !== 0) {
         res.status(OK).send(cards)
       } else {
-        res.status(DATABASE_ERROR).send({ message: "Карточки не найдены." })
+        res.status(400).send({ message: "Карточки не найдены." })
       }
     })
     .catch(err => handleError(req, res))
