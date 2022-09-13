@@ -1,52 +1,63 @@
-const mongoose = require('mongoose');
-const User = require('../models/user')
-const { OK, INPUT_DATA_ERROR, DATABASE_ERROR, DEFAULT_ERROR, handleError } = require('../constants/constants');
+const User = require('../models/user');
+const {
+  OK, INPUT_DATA_ERROR, DATABASE_ERROR, handleError,
+} = require('../constants/constants');
 
-//Create user
+// Create user
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      const { name, about, avatar, _id } = user;
-      res.status(OK).send({ name, about, avatar, _id });
+      const {
+        name, about, avatar, _id,
+      } = user;
+      res.status(OK).send({
+        name, about, avatar, _id,
+      });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(INPUT_DATA_ERROR).send({ message: "Переданы некорректные данные при создании пользователя." })
+      if (err.name === 'ValidationError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       } else {
-      handleError(req, res)
-    }
-  })
-}
-//Read all users
+        handleError(req, res);
+      }
+    });
+};
+// Read all users
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      if (users.length !== 0) {
-      res.status(OK).send(users)
-    } else {
-      res.status(DATABASE_ERROR).send({message: `Пользователи не найдены.`})
-    }
+      res.status(OK).send(users);
     })
-    .catch(err => handleError(req, res))
-}
-//Read current user
+    .catch((err) => handleError(req, res));
+};
+// Read current user
 const getUserById = (req, res) => {
-  if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-    User.findById(req.params.id)
-      .then((user) => {
-        if (user) {
-          res.status(OK).send(user)
-        } else {
-          res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
-        }
-      })
-      .catch(err => handleError(req, res))
-  } else {
-    res.status(INPUT_DATA_ERROR).send({ message: `Некорректно задан id ${req.params.cardId}.` })
-  }
-}
-//Update name/ about
+  User.findById(req.params.id)
+    .orFail(() => {
+      const error = new Error(`Пользователь с указанным ${req.params.id} не найден.`);
+      error.statusCode = 404;
+      throw error;
+    })
+    .then((user) => {
+      const {
+        name, about, avatar, _id,
+      } = user;
+      res.status(OK).send({
+        name, about, avatar, _id,
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор пользователя.' });
+      } else if (err.statusCode === 404) {
+        res.status(DATABASE_ERROR).send({ message: err.message });
+      } else {
+        handleError(req, res);
+      }
+    });
+};
+// Update name/ about
 const updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
@@ -55,26 +66,33 @@ const updateUser = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true
-    }
-    )
-    .then((user) => {
-      if (user) {
-        const { name, about, avatar, _id } = user
-        res.status(OK).send({ name, about, avatar, _id })
-      } else {
-        res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
-      }
+      upsert: false,
+    },
+  )
+    .orFail(() => {
+      const error = new Error(`Пользователь с указанным ${req.user._id} не найден.`);
+      error.statusCode = 404;
+      throw error;
     })
-    .catch(err => {
-      if (err.name === "ValidationError") {
-        res.status(INPUT_DATA_ERROR).send({message: "Переданы некорректные данные при создании пользователя. "})
+    .then((user) => {
+      const {
+        name, about, avatar, _id,
+      } = user;
+      res.status(OK).send({
+        name, about, avatar, _id,
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор пользователя.' });
+      } else if (err.statusCode === 404) {
+        res.status(DATABASE_ERROR).send({ message: err.message });
       } else {
-      handleError(req, res)
-    }
-  })
-}
-//Update avatar
+        handleError(req, res);
+      }
+    });
+};
+// Update avatar
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
@@ -83,29 +101,37 @@ const updateAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true
+      upsert: false,
+    },
+  )
+    .orFail(() => {
+      const error = new Error(`Пользователь с указанным ${req.user._id} не найден.`);
+      error.statusCode = 404;
+      throw error;
     })
     .then((user) => {
-      if (user) {
-        const { name, about, avatar, _id } = user
-        res.status(OK).send({ name, about, avatar, _id })
-      } else {
-        res.status(DATABASE_ERROR).send({message: `Пользователь по указанному ${req.params.id} не найден.`})
-      }
+      const {
+        name, about, avatar, _id,
+      } = user;
+      res.status(OK).send({
+        name, about, avatar, _id,
+      });
     })
-    .catch(err => {
-      if (err.name === "ValidationError") {
-        res.status(INPUT_DATA_ERROR).send({message: "Переданы некорректные данные при создании пользователя. "})
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор пользователя.' });
+      } else if (err.statusCode === 404) {
+        res.status(DATABASE_ERROR).send({ message: err.message });
       } else {
-      handleError(req, res)
-    }
-  })
-}
+        handleError(req, res);
+      }
+    });
+};
 
 module.exports = {
   createUser,
   getUserById,
   getUsers,
   updateUser,
-  updateAvatar
-}
+  updateAvatar,
+};

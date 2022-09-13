@@ -4,19 +4,13 @@ module.exports = {
     commonjs: true,
     es2021: true,
   },
-  extends: [
-    'plugin:react/recommended',
-    'airbnb',
-  ],
+  extends: ['eslint:recommended', 'airbnb'],
   overrides: [
   ],
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  plugins: [
-    'react',
-  ],
   rules: {
-    "allow": ["_id"],
+    "no-underscore-dangle": "off",
   },
 };

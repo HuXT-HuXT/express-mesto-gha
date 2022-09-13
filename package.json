@@ -1,35 +1,22 @@
 {
-  "name": "express-mesto-gha",
+  "name": "y",
   "version": "1.0.0",
-  "description": "express-exam",
+  "description": "",
   "main": "app.js",
   "scripts": {
-    "lint": "eslint --fix --ext .js .",
+    "lint": "npx eslint .",
+    "lint:fix": "eslint --fix --ext .js,.jsx .",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "repository": {
-    "type": "eslintrc.js",
-    "url": "git+https://github.com/HuXT-HuXT/express-mesto-gha.git"
-  },
-  "author": "KS",
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/HuXT-HuXT/express-mesto-gha/issues"
-  },
-  "homepage": "https://github.com/HuXT-HuXT/express-mesto-gha#readme",
   "devDependencies": {
-    "eslint": "^8.23.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.1",
-    "eslint-plugin-react": "^7.31.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "nodemon": "^2.0.19",
-    "eslint-config-airbnb-base": "^15.0.0"
+    "eslint": "^8.23.1",
+    "nodemon": "^2.0.19"
   },
   "dependencies": {
-    "body-parser": "^1.20.0",
+    "eslint-config-airbnb": "^19.0.4",
     "express": "^4.18.1",
     "mongoose": "^6.6.0"
   }
