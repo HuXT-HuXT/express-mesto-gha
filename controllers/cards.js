@@ -23,7 +23,7 @@ const readCards = (req, res) => {
     .then((cards) => {
       res.status(OK).send({ data: cards });
     })
-    .catch((err) => handleError(req, res));
+    .catch(() => handleError(req, res));
 };
 
 const removeCard = (req, res) => {

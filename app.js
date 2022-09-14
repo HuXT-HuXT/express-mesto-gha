@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
-// 3000, 7665
+// 3000, 7665, 8080
 const { PORT = 8080 } = process.env;
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
@@ -19,7 +19,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   req.user = {
     _id: '6314b11634f09f4290e5ca63',
-    // 6314b11634f09f4290e5ca63
   };
 
   next();

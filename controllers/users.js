@@ -8,9 +8,7 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      const {
-        name, about, avatar, _id,
-      } = user;
+      const { _id } = user;
       res.status(OK).send({
         name, about, avatar, _id,
       });
@@ -29,7 +27,7 @@ const getUsers = (req, res) => {
     .then((users) => {
       res.status(OK).send(users);
     })
-    .catch((err) => handleError(req, res));
+    .catch(() => handleError(req, res));
 };
 // Read current user
 const getUserById = (req, res) => {
@@ -76,15 +74,15 @@ const updateUser = (req, res) => {
     })
     .then((user) => {
       const {
-        name, about, avatar, _id,
+        avatar, _id,
       } = user;
       res.status(OK).send({
         name, about, avatar, _id,
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор пользователя.' });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор/ данные пользователя.' });
       } else if (err.statusCode === 404) {
         res.status(DATABASE_ERROR).send({ message: err.message });
       } else {
@@ -111,15 +109,15 @@ const updateAvatar = (req, res) => {
     })
     .then((user) => {
       const {
-        name, about, avatar, _id,
+        name, about, _id,
       } = user;
       res.status(OK).send({
         name, about, avatar, _id,
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор пользователя.' });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор/ данные пользователя.' });
       } else if (err.statusCode === 404) {
         res.status(DATABASE_ERROR).send({ message: err.message });
       } else {
