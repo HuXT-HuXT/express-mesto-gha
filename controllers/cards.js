@@ -1,6 +1,5 @@
 const Card = require('../models/card');
 const { OK } = require('../constants/constants');
-const Conflict = require('../errors/Conflict');
 const DefaultError = require('../errors/DefaultError');
 const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
@@ -45,7 +44,7 @@ const removeCard = (req, res, next) => {
         throw new Unauthorized('Карточка создана другим пользователем.');
       }
       Card.deleteOne(card)
-        .then(() => res.send({ data: card }))
+        .then(() => res.send({ data: card }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -57,7 +56,7 @@ const removeCard = (req, res, next) => {
       if (err.statusCode === 404) {
         next(err);
       } else {
-        ext(new DefaultError('Ошибка по умолчанию'));
+        next(new DefaultError('Ошибка по умолчанию'));
       }
     });
 };
@@ -79,7 +78,7 @@ const likeCard = ((req, res, next) => {
       } else if (err.statusCode === 404) {
         next(err);
       } else {
-        ext(new DefaultError('Ошибка по умолчанию'));
+        next(new DefaultError('Ошибка по умолчанию'));
       }
     });
 });
@@ -101,7 +100,7 @@ const dislikeCard = ((req, res, next) => {
       } else if (err.statusCode === 404) {
         next(err);
       } else {
-        ext(new DefaultError('Ошибка по умолчанию'));
+        next(new DefaultError('Ошибка по умолчанию'));
       }
     });
 });

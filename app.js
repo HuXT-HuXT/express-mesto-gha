@@ -10,7 +10,7 @@ const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 // 3000, 7665, 8080
 const { PORT = 3000 } = process.env;
-const regex = /(https?:\/\/)([www\.]?[a-zA-Z0-9-]+\.)([^\s]{2,})/;
+const regex = /(https?:\/\/)([www.]?[a-zA-Z0-9-]+\.)([^\s]{2,})/;
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
