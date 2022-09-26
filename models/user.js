@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const validator = require('validator')
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -29,15 +29,15 @@ const userSchema = new mongoose.Schema({
     validate: {
       validator(email) {
         return validator.isEmail(email);
-      }
-    }
+      },
+    },
   },
   password: {
     type: String,
     required: true,
     select: false,
     minlength: 5,
-  }
+  },
 });
 
 module.exports = mongoose.model('user', userSchema);
