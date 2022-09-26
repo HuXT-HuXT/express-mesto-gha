@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
@@ -44,6 +45,8 @@ app.post('/signup', celebrate({
 app.all('*', (req, res) => {
   res.status(404).send({ message: '404! Страница не найдена.' });
 });
+
+app.use(errors());
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });
 });
