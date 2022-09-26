@@ -1,7 +1,10 @@
 const Card = require('../models/card');
-const {
-  OK, INPUT_DATA_ERROR, DATABASE_ERROR, handleError,
-} = require('../constants/constants');
+const { OK } = require('../constants/constants');
+const Conflict = require('../errors/Conflict');
+const DefaultError = require('../errors/DefaultError');
+const InputError = require('../errors/InputError');
+const NotFound = require('../errors/NotFound');
+const Unauthorized = require('../errors/Unauthorized');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -11,9 +14,9 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        next(new InputError('Переданы некорректные данные при создании карточки.'));
       } else {
-        handleError(req, res);
+        next(new DefaultError('Ошибка по умолчанию'));
       }
     });
 };
@@ -23,26 +26,38 @@ const readCards = (req, res) => {
     .then((cards) => {
       res.status(OK).send({ data: cards });
     })
-    .catch(() => handleError(req, res));
+    .catch(() => {
+      next(new DefaultError('Ошибка по умолчанию'));
+    });
 };
 
 const removeCard = (req, res) => {
   const { cardId } = req.params;
+  const userId = req.user._id;
+  console.log(req.user._id);
   Card.findById(cardId)
     .orFail(() => {
-      const error = new Error(`Карточка с указанным ${cardId} не найдена.`);
-      error.statusCode = 404;
-      throw error;
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
-    .then((card) => Card.deleteOne(card)
-      .then(() => res.send({ data: card })))
+    .then((card) => {
+      const owner = card.owner.toString();
+      if (owner !== userId) {
+        throw new Unauthorized('Карточка создана другим пользователем.');
+      }
+      Card.deleteOne(card)
+        .then(() => res.send({ data: card }))
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор карточки' });
-      } else if (err.statusCode === 404) {
-        res.status(DATABASE_ERROR).send({ message: err.message });
+        next(new InputError('Невалидный идентификатор карточки.'));
+      }
+      if (err.statusCode === 401) {
+        next(err);
+      }
+      if (err.statusCode === 404) {
+        next(err);
       } else {
-        handleError(req, res);
+        ext(new DefaultError('Ошибка по умолчанию'));
       }
     });
 };
@@ -55,18 +70,16 @@ const likeCard = ((req, res) => {
     { new: true },
   )
     .orFail(() => {
-      const error = new Error(`Карточка с указанным ${cardId} не найдена.`);
-      error.statusCode = 404;
-      throw error;
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор карточки' });
+        next(new InputError('Невалидный идентификатор карточки.'));
       } else if (err.statusCode === 404) {
-        res.status(DATABASE_ERROR).send({ message: err.message });
+        next(err);
       } else {
-        handleError(req, res);
+        ext(new DefaultError('Ошибка по умолчанию'));
       }
     });
 });
@@ -79,18 +92,16 @@ const dislikeCard = ((req, res) => {
     { new: true },
   )
     .orFail(() => {
-      const error = new Error(`Карточка с указанным ${cardId} не найдена.`);
-      error.statusCode = 404;
-      throw error;
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(INPUT_DATA_ERROR).send({ message: 'Невалидный идентификатор карточки' });
+        next(new InputError('Невалидный идентификатор карточки.'));
       } else if (err.statusCode === 404) {
-        res.status(DATABASE_ERROR).send({ message: err.message });
+        next(err);
       } else {
-        handleError(req, res);
+        ext(new DefaultError('Ошибка по умолчанию'));
       }
     });
 });
