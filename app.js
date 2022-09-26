@@ -32,9 +32,15 @@ app.post('/signin', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(regex),
-  })
-}), login)
-app.post('/signup', createUser)
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(5).required(),
+  }),
+}), createUser);
+
 app.all('*', (req, res) => {
   res.status(404).send({ message: '404! Страница не найдена.' });
 });

@@ -6,7 +6,7 @@ const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 const Unauthorized = require('../errors/Unauthorized');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
@@ -21,7 +21,7 @@ const createCard = (req, res) => {
     });
 };
 
-const readCards = (req, res) => {
+const readCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       res.status(OK).send({ data: cards });
@@ -31,7 +31,7 @@ const readCards = (req, res) => {
     });
 };
 
-const removeCard = (req, res) => {
+const removeCard = (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
   console.log(req.user._id);
@@ -62,7 +62,7 @@ const removeCard = (req, res) => {
     });
 };
 
-const likeCard = ((req, res) => {
+const likeCard = ((req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
@@ -84,7 +84,7 @@ const likeCard = ((req, res) => {
     });
 });
 
-const dislikeCard = ((req, res) => {
+const dislikeCard = ((req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
