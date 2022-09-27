@@ -47,8 +47,13 @@ app.all('*', (req, res) => {
 });
 
 app.use(errors());
-app.use((err, req, res) => {
-  res.status(err.statusCode).send({ message: err.message });
+app.use((err, req, res, next) => {
+  console.log('error_handler')
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({ message: statusCode === 500 ? 'Ошибка по умолчанию' : message });
 });
 
 app.listen(PORT, () => {

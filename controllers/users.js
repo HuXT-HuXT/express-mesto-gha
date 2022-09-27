@@ -26,14 +26,12 @@ const createUser = (req, res, next) => {
           });
         })
         .catch((err) => {
+          console.log(err.code)
           if (err.code === 11000) {
-            next(new Conflict('Email уже существует'));
-          } else if (err.name === 'ValidationError') {
-            next(new InputError({ message: 'Переданы некорректные данные при создании пользователя.' }));
-          } else {
-            next(new DefaultError({ message: 'Ошибка по умолчанию' }));
+            throw new Conflict('Email уже существует');
           }
-        });
+        })
+        .catch(next);
     });
 };
 // Read all users
@@ -42,35 +40,24 @@ const getUsers = (req, res, next) => {
     .then((users) => {
       res.status(OK).send(users);
     })
-    .catch(() => {
-      next(new DefaultError({ message: 'Ошибка по умолчанию' }));
-    });
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
-    })
     .then((user) => {
+      if (!user) {
+        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      }
       const {
         name, about, avatar, _id,
       } = user;
       res.status(OK).send({
         name, about, avatar, _id,
-      });
+      })
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new InputError('Невалидный идентификатор пользователя.'));
-      } else if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
-      }
-    });
-};
-
+    .catch(next);
+}
 // Read user by ID
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
@@ -164,27 +151,27 @@ const updateAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
+  let _id;
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new NotFound('Неправильные почта или пароль'));
       }
-
-      return { matched: bcrypt.compare(password, user.password), _id: user._id };
+      _id = user._id;
+      return bcrypt.compare(password, user.password);
     })
-    .then((data) => {
-      if (!data.matched) {
+    .then((matched) => {
+      if (!matched) {
         return Promise.reject(new NotFound('Неправильные почта или пароль'));
       }
-      const token = jwt.sign({ _id: data._id }, 'very-secret-key');
-      console.log(token);
+      const token = jwt.sign({ _id }, 'very-secret-key');
       return res
         .status(OK)
         .cookie('jwt', token, {
           maxAge: 604800000,
           httpOnly: true,
         })
-        .send({ id: data._id });
+        .send({ id: _id });
     })
     .catch((err) => {
       if (err.statusCode === 404) {

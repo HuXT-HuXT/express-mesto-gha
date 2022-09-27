@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
+  const token = req.cookies.jwt;
+  console.log(token);
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  if (!token) {
     return res.status(401).send({ message: 'Non-authorized' });
   }
 
-  const token = authorization.replace('Bearer ', '');
   let payload;
 
   try {
