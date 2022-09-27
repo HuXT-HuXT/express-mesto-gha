@@ -29,7 +29,7 @@ const createUser = (req, res, next) => {
           if (err.code === 11000) {
             next(new Conflict('Email уже существует'));
           } else if (err.name === 'ValidationError') {
-            next(new InputError({ message: 'Переданы некорректные данные при создании пользователя.'}));
+            next(new InputError({ message: 'Переданы некорректные данные при создании пользователя.' }));
           } else {
             next(new DefaultError({ message: 'Ошибка по умолчанию' }));
           }
