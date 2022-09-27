@@ -29,9 +29,9 @@ const createUser = (req, res, next) => {
           if (err.code === 11000) {
             next(new Conflict('Email уже существует'));
           } else if (err.name === 'ValidationError') {
-            next(new InputError('Переданы некорректные данные при создании пользователя.'));
+            next(new InputError({ message: 'Переданы некорректные данные при создании пользователя.'}));
           } else {
-            next(new DefaultError('Ошибка по умолчанию'));
+            next(new DefaultError({ message: 'Ошибка по умолчанию' }));
           }
         });
     });
@@ -43,7 +43,7 @@ const getUsers = (req, res, next) => {
       res.status(OK).send(users);
     })
     .catch(() => {
-      next(new DefaultError('Ошибка по умолчанию'));
+      next(new DefaultError({ message: 'Ошибка по умолчанию' }));
     });
 };
 
