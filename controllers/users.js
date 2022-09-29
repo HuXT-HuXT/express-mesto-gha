@@ -168,13 +168,13 @@ const login = (req, res, next) => {
             })
             .send({ id: user._id });
         })
-        .catch((err) => {
-          if (err.message === 'Unauthorized') {
-            throw new Unauthorized('Неправильные почта или пароль');
-          }
-        })
-        .catch(next);
-    });
+    })
+    .catch((err) => {
+      if (err.message === 'Unauthorized') {
+        throw new Unauthorized('Неправильные почта или пароль');
+      }
+    })
+    .catch(next);
 };
 
 module.exports = {
