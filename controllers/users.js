@@ -106,7 +106,7 @@ const updateUser = (req, res, next) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         throw new InputError('Невалидный идентификатор пользователя.');
       } else if (err.message === 'NotFound') {
-        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);;
+        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
       } else {
         next(new DefaultError('Ошибка по умолчанию'));
       }
