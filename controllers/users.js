@@ -148,35 +148,33 @@ const updateAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  let _id;
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
+        return Promise.reject(new Error('Unauthorized'));
       }
-      _id = user._id;
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
-      }
-      const token = jwt.sign({ _id }, 'very-secret-key');
-      return res
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Unauthorized'));
+          }
+        const token = jwt.sign({ _id: user._id }, 'very-secret-key');
+
+        return res
         .status(OK)
         .cookie('jwt', token, {
           maxAge: 604800000,
           httpOnly: true,
         })
-        .send({ id: _id });
-    })
-    .catch((err) => {
-      if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
-      }
-    });
+        .send({ id: user._id });
+        })
+        .catch((err) => {
+          if (err.message === 'Unauthorized') {
+            throw new Unauthorized('Неправильные почта или пароль');
+          }
+        })
+        .catch(next)
+  })
 };
 
 module.exports = {
