@@ -4,7 +4,6 @@ const DefaultError = require('../errors/DefaultError');
 const Forbidden = require('../errors/Forbidden');
 const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
-const Unauthorized = require('../errors/Unauthorized');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;

@@ -27,7 +27,6 @@ const createUser = (req, res, next) => {
           });
         })
         .catch((err) => {
-          console.log(err.code)
           if (err.code === 11000) {
             throw new Conflict('Email уже существует');
           }
@@ -52,15 +51,15 @@ const getCurrentUser = (req, res, next) => {
       }
       res.status(OK).send({
         data: user,
-      })
+      });
     })
     .catch(next);
-}
+};
 // Read user by ID
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${eq.params.id} не найден.`);
+      throw new NotFound(`Пользователь с указанным ${req.params.id} не найден.`);
     })
     .then((user) => {
       const {
