@@ -4,7 +4,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   createCard, readCards, removeCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
-const regex = require('../constants/constants');
+const { regex } = require('../constants/constants');
 
 router.post('/', celebrate({
   body: Joi.object().keys({
