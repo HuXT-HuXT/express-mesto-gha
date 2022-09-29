@@ -161,12 +161,12 @@ const login = (req, res, next) => {
           const token = jwt.sign({ _id: user._id }, 'very-secret-key');
 
           return res
-          .status(OK)
-          .cookie('jwt', token, {
-            maxAge: 604800000,
-            httpOnly: true,
-          })
-          .send({ id: user._id });
+            .status(OK)
+            .cookie('jwt', token, {
+              maxAge: 604800000,
+              httpOnly: true,
+            })
+            .send({ id: user._id });
         })
         .catch((err) => {
           if (err.message === 'Unauthorized') {
