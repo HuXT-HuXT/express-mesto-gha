@@ -167,7 +167,7 @@ const login = (req, res, next) => {
               httpOnly: true,
             })
             .send({ id: user._id });
-        })
+        });
     })
     .catch((err) => {
       if (err.message === 'Unauthorized') {
