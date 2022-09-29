@@ -92,7 +92,7 @@ const updateUser = (req, res, next) => {
     },
   )
     .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      throw new Error('NotFound');
     })
     .then((user) => {
       const {
@@ -104,13 +104,14 @@ const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new InputError('Невалидный идентификатор пользователя.'));
-      } else if (err.statusCode === 404) {
-        next(err);
+        throw new InputError('Невалидный идентификатор пользователя.');
+      } else if (err.message === 'NotFound') {
+        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);;
       } else {
         next(new DefaultError('Ошибка по умолчанию'));
       }
-    });
+    })
+    .catch(next);
 };
 // Update avatar
 const updateAvatar = (req, res, next) => {

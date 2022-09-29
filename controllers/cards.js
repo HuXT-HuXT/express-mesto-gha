@@ -1,11 +1,7 @@
 const Card = require('../models/card');
 const { OK } = require('../constants/constants');
-const DefaultError = require('../errors/DefaultError');
 const Forbidden = require('../errors/Forbidden');
-const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
-const Unauthorized = require('../errors/Unauthorized');
-
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -13,13 +9,7 @@ const createCard = (req, res, next) => {
     .then((card) => {
       res.status(OK).send(card);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new InputError('Переданы некорректные данные при создании карточки.'));
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
-      }
-    });
+    .catch(next);
 };
 
 const readCards = (req, res, next) => {
@@ -27,40 +17,35 @@ const readCards = (req, res, next) => {
     .then((cards) => {
       res.status(OK).send({ data: cards });
     })
-    .catch(() => {
-      next(new DefaultError('Ошибка по умолчанию'));
-    });
+    .catch(next);
 };
 
 const removeCard = (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
-  console.log(req.user._id);
   Card.findById(cardId)
     .orFail(() => {
-      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
+      throw new Error('NotFound');
     })
     .then((card) => {
       const owner = card.owner.toString();
+
       if (owner !== userId) {
-        throw new Unauthorized('Карточка создана другим пользователем.');
+        console.log(owner !== userId)
+        throw new Error('Forbidden');
       }
       Card.deleteOne(card)
         .then(() => res.send({ data: card }));
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new InputError('Невалидный идентификатор карточки.'));
+      if (err.message === 'Forbidden') {
+        throw new Forbidden('Карточка создана другим пользователем.');
       }
-      if (err.statusCode === 401) {
-        next(err);
+      if (err.message === 'NotFound') {
+        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
       }
-      if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
-      }
-    });
+    })
+    .catch(next);
 };
 
 const likeCard = ((req, res, next) => {
@@ -71,18 +56,15 @@ const likeCard = ((req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
+      throw new Error('NotFound');
     })
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new InputError('Невалидный идентификатор карточки.'));
-      } else if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+      if (err.message === 'NotFound') {
+        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
       }
-    });
+    })
+    .catch(next);
 });
 
 const dislikeCard = ((req, res, next) => {
@@ -92,17 +74,13 @@ const dislikeCard = ((req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(() => {
-      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
-    })
+  .orFail(() => {
+    throw new Error('NotFound');
+  })
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new InputError('Невалидный идентификатор карточки.'));
-      } else if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+      if (err.message === 'NotFound') {
+        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
       }
     });
 });
