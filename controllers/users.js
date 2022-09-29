@@ -5,6 +5,7 @@ const User = require('../models/user');
 const { OK } = require('../constants/constants');
 const Conflict = require('../errors/Conflict');
 const DefaultError = require('../errors/DefaultError');
+const Unauthorized = require('../errors/Unauthorized');
 const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 
@@ -49,11 +50,8 @@ const getCurrentUser = (req, res, next) => {
       if (!user) {
         throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
       }
-      const {
-        name, about, avatar, _id,
-      } = user;
       res.status(OK).send({
-        name, about, avatar, _id,
+        data: user,
       })
     })
     .catch(next);
@@ -62,7 +60,7 @@ const getCurrentUser = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      throw new NotFound(`Пользователь с указанным ${eq.params.id} не найден.`);
     })
     .then((user) => {
       const {
@@ -155,14 +153,14 @@ const login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new NotFound('Неправильные почта или пароль'));
+        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
       }
       _id = user._id;
       return bcrypt.compare(password, user.password);
     })
     .then((matched) => {
       if (!matched) {
-        return Promise.reject(new NotFound('Неправильные почта или пароль'));
+        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
       }
       const token = jwt.sign({ _id }, 'very-secret-key');
       return res

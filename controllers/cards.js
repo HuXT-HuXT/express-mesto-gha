@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 const { OK } = require('../constants/constants');
 const DefaultError = require('../errors/DefaultError');
+const Forbidden = require('../errors/Forbidden');
 const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 const Unauthorized = require('../errors/Unauthorized');
@@ -41,7 +42,7 @@ const removeCard = (req, res, next) => {
     .then((card) => {
       const owner = card.owner.toString();
       if (owner !== userId) {
-        throw new Unauthorized('Карточка создана другим пользователем.');
+        throw new Forbidden('Карточка создана другим пользователем.');
       }
       Card.deleteOne(card)
         .then(() => res.send({ data: card }));

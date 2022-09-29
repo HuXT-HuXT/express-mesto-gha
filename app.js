@@ -11,7 +11,7 @@ const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 // 3000, 7665, 8080
 const { PORT = 3000 } = process.env;
-const regex = /(https?:\/\/)([www.]?[a-zA-Z0-9-]+\.)([^\s]{2,})/;
+const regex = require('./constants/constants');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -54,6 +54,8 @@ app.use((err, req, res, next) => {
   res
     .status(statusCode)
     .send({ message: statusCode === 500 ? 'Ошибка по умолчанию' : message });
+
+  next();
 });
 
 app.listen(PORT, () => {

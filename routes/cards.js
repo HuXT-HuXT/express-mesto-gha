@@ -4,8 +4,9 @@ const { celebrate, Joi } = require('celebrate');
 const {
   createCard, readCards, removeCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
+const regex = require('../constants/constants');
 
-const regex = /(https?:\/\/)([www.]?[a-zA-Z0-9-]+\.)([^\s]{2,})/;
+
 
 router.post('/', celebrate({
   body: Joi.object().keys({
