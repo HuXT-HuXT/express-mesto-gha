@@ -4,9 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { OK } = require('../constants/constants');
 const Conflict = require('../errors/Conflict');
-const DefaultError = require('../errors/DefaultError');
 const Unauthorized = require('../errors/Unauthorized');
-const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 
 // Create user
@@ -59,7 +57,6 @@ const getCurrentUser = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-
       throw new Error('NotFound');
     })
     .then((user) => {
