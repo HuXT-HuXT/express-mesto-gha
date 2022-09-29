@@ -31,7 +31,6 @@ const removeCard = (req, res, next) => {
       const owner = card.owner.toString();
 
       if (owner !== userId) {
-        console.log(owner !== userId)
         throw new Error('Forbidden');
       }
       Card.deleteOne(card)
@@ -74,15 +73,16 @@ const dislikeCard = ((req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-  .orFail(() => {
-    throw new Error('NotFound');
-  })
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.message === 'NotFound') {
         throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
       }
-    });
+    })
+    .catch(next);
 });
 
 module.exports = {
