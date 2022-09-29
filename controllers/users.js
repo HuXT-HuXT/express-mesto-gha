@@ -158,23 +158,23 @@ const login = (req, res, next) => {
           if (!matched) {
             return Promise.reject(new Error('Unauthorized'));
           }
-        const token = jwt.sign({ _id: user._id }, 'very-secret-key');
+          const token = jwt.sign({ _id: user._id }, 'very-secret-key');
 
-        return res
-        .status(OK)
-        .cookie('jwt', token, {
-          maxAge: 604800000,
-          httpOnly: true,
-        })
-        .send({ id: user._id });
+          return res
+          .status(OK)
+          .cookie('jwt', token, {
+            maxAge: 604800000,
+            httpOnly: true,
+          })
+          .send({ id: user._id });
         })
         .catch((err) => {
           if (err.message === 'Unauthorized') {
             throw new Unauthorized('Неправильные почта или пароль');
           }
         })
-        .catch(next)
-  })
+        .catch(next);
+    });
 };
 
 module.exports = {
