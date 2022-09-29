@@ -59,7 +59,8 @@ const getCurrentUser = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${req.params.id} не найден.`);
+
+      throw new Error('NotFound');
     })
     .then((user) => {
       const {
@@ -70,14 +71,11 @@ const getUserById = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new InputError('Невалидный идентификатор пользователя.'));
-      } else if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+      if (err.message === 'NotFound') {
+        throw new NotFound(`Пользователь с указанным ${req.params.id} не найден.`);
       }
-    });
+    })
+    .catch(next);
 };
 // Update name/ about
 const updateUser = (req, res, next) => {
@@ -103,12 +101,8 @@ const updateUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new InputError('Невалидный идентификатор пользователя.');
-      } else if (err.message === 'NotFound') {
+      if (err.message === 'NotFound') {
         throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
       }
     })
     .catch(next);
@@ -126,7 +120,7 @@ const updateAvatar = (req, res, next) => {
     },
   )
     .orFail(() => {
-      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      throw new Error('NotFound');
     })
     .then((user) => {
       const {
@@ -137,14 +131,11 @@ const updateAvatar = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new InputError('Невалидный идентификатор пользователя.'));
-      } else if (err.statusCode === 404) {
-        next(err);
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+      if (err.statusCode === 404) {
+        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
       }
-    });
+    })
+    .catch(next);
 };
 
 const login = (req, res, next) => {
