@@ -12,6 +12,7 @@ const { createUser, login } = require('./controllers/users');
 // 3000, 7665, 8080
 const { PORT = 7665 } = process.env;
 const { regex } = require('./constants/constants');
+const NotFound = require('./errors/NotFound');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -35,15 +36,15 @@ app.post('/signin', celebrate({
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    password: Joi.string().min(5).required(),
+    password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(regex),
   }),
 }), createUser);
 
-app.all('*', (req, res) => {
-  res.status(404).send({ message: '404! Страница не найдена.' });
+app.all('*', auth => {
+  throw new NotFound('404! Страница не найдена.');
 });
 
 app.use(errors());
