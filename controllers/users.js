@@ -2,10 +2,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const { OK } = require('../constants/constants');
 const Conflict = require('../errors/Conflict');
-const Unauthorized = require('../errors/Unauthorized');
+const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
+const Unauthorized = require('../errors/Unauthorized');
+
 
 // Create user
 const createUser = (req, res, next) => {
@@ -20,23 +21,26 @@ const createUser = (req, res, next) => {
       })
         .then((user) => {
           const { _id } = user;
-          res.status(OK).send({
+          res.send({
             name, about, avatar, _id,
           });
         })
         .catch((err) => {
           if (err.code === 11000) {
-            throw new Conflict('Email уже существует');
+            next(new Conflict('Email уже существует'));
+          } else if (err.name === 'ValidationError') {
+            next(new InputError('Переданы некорректные данные при создании пользователя.'));
+          } else {
+            next(err);
           }
-        })
-        .catch(next);
+        });
     });
 };
 // Read all users
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(OK).send(users);
+      res.send(users);
     })
     .catch(next);
 };
@@ -47,7 +51,7 @@ const getCurrentUser = (req, res, next) => {
       if (!user) {
         throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
       }
-      res.status(OK).send({
+      res.send({
         data: user,
       });
     })
@@ -57,22 +61,23 @@ const getCurrentUser = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Пользователь с указанным ${req.params.id} не найден.`);
     })
     .then((user) => {
       const {
         name, about, avatar, _id,
       } = user;
-      res.status(OK).send({
+      res.send({
         name, about, avatar, _id,
       });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFound(`Пользователь с указанным ${req.params.id} не найден.`);
+      if (err.name === 'CastError') {
+        next(new InputError('Невалидный идентификатор пользователя.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 // Update name/ about
 const updateUser = (req, res, next) => {
@@ -87,22 +92,23 @@ const updateUser = (req, res, next) => {
     },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
     })
     .then((user) => {
       const {
         avatar, _id,
       } = user;
-      res.status(OK).send({
+      res.send({
         name, about, avatar, _id,
       });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      if (err.name === 'ValidationError') {
+        next(new InputError('Переданы некорректные данные.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 // Update avatar
 const updateAvatar = (req, res, next) => {
@@ -117,22 +123,23 @@ const updateAvatar = (req, res, next) => {
     },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
     })
     .then((user) => {
       const {
         name, about, _id,
       } = user;
-      res.status(OK).send({
+      res.send({
         name, about, avatar, _id,
       });
     })
     .catch((err) => {
-      if (err.statusCode === 404) {
-        throw new NotFound(`Пользователь с указанным ${req.user._id} не найден.`);
+      if (err.name === 'ValidationError') {
+        next(new InputError('Переданы некорректные данные.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const login = (req, res, next) => {
@@ -140,28 +147,22 @@ const login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Unauthorized'));
+        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Unauthorized'));
+            return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
           }
           const token = jwt.sign({ _id: user._id }, 'very-secret-key');
 
           return res
-            .status(OK)
             .cookie('jwt', token, {
               maxAge: 604800000,
               httpOnly: true,
             })
             .send({ id: user._id });
         });
-    })
-    .catch((err) => {
-      if (err.message === 'Unauthorized') {
-        throw new Unauthorized('Неправильные почта или пароль');
-      }
     })
     .catch(next);
 };

@@ -1,21 +1,28 @@
 const Card = require('../models/card');
-const { OK } = require('../constants/constants');
 const Forbidden = require('../errors/Forbidden');
+const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      res.status(OK).send(card);
+      res.send(card);
     })
-    .catch(next);
+    .catch((err) => {
+      //решил, что проверка валидиации будет лишней, так как за это теперь отввечает celebrate)
+      if (err.name === 'ValidationError') {
+        next(new InputError('Переданы некорректные данные при создании карточки.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const readCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.status(OK).send({ data: cards });
+      res.send({ data: cards });
     })
     .catch(next);
 };
@@ -25,26 +32,26 @@ const removeCard = (req, res, next) => {
   const userId = req.user._id;
   Card.findById(cardId)
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
     .then((card) => {
       const owner = card.owner.toString();
 
       if (owner !== userId) {
-        throw new Error('Forbidden');
-      }
-      Card.deleteOne(card)
-        .then(() => res.send({ data: card }));
-    })
-    .catch((err) => {
-      if (err.message === 'Forbidden') {
         throw new Forbidden('Карточка создана другим пользователем.');
       }
-      if (err.message === 'NotFound') {
-        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
-      }
+      Card.deleteOne(card)
+        .then(() => res.send({ data: card }))
+        .catch(next);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        //нужна ли тогда и такая проверка?
+        next(new InputError('Невалидный идентификатор карточки.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const likeCard = ((req, res, next) => {
@@ -55,15 +62,16 @@ const likeCard = ((req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
-    .then((card) => res.status(OK).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
+      if (err.name === 'CastError') {
+        next(new InputError('Невалидный идентификатор карточки.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 });
 
 const dislikeCard = ((req, res, next) => {
@@ -74,15 +82,16 @@ const dislikeCard = ((req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
     })
-    .then((card) => res.status(OK).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFound(`Карточка с указанным ${cardId} не найдена.`);
+      if (err.name === 'CastError') {
+        next(new InputError('Невалидный идентификатор карточки.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 });
 
 module.exports = {
