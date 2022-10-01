@@ -43,7 +43,7 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
-app.all('*', auth, function(next) {
+app.all('*', auth, (next) => {
   next(new NotFound('404! Страница не найдена.'));
 });
 
