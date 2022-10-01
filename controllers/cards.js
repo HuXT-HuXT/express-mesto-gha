@@ -10,7 +10,7 @@ const createCard = (req, res, next) => {
       res.send(card);
     })
     .catch((err) => {
-      //решил, что проверка валидиации будет лишней, так как за это теперь отввечает celebrate)
+      // решил, что проверка валидиации будет лишней, так как за это теперь отввечает celebrate)
       if (err.name === 'ValidationError') {
         next(new InputError('Переданы некорректные данные при создании карточки.'));
       } else {
@@ -46,7 +46,7 @@ const removeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        //нужна ли тогда и такая проверка?
+        // нужна ли тогда и такая проверка?
         next(new InputError('Невалидный идентификатор карточки.'));
       } else {
         next(err);

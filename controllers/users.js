@@ -7,7 +7,6 @@ const InputError = require('../errors/InputError');
 const NotFound = require('../errors/NotFound');
 const Unauthorized = require('../errors/Unauthorized');
 
-
 // Create user
 const createUser = (req, res, next) => {
   const {
