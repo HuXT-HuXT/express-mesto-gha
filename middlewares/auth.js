@@ -2,8 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const Unauthorized = require('../errors/Unauthorized');
 
-// правильно ли  понимаю, что избежать данной ошибки линтера можно убрав стрелочную функцию?
-// eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
 

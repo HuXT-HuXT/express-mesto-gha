@@ -10,7 +10,7 @@ const routerCards = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 // 3000, 7665, 8080
-const { PORT = 3000 } = process.env;
+const { PORT = 7665 } = process.env;
 const { regex } = require('./constants/constants');
 const NotFound = require('./errors/NotFound');
 
@@ -30,7 +30,7 @@ app.use('/cards', auth, routerCards);
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    password: Joi.string().min(5).required(),
+    password: Joi.string().required(),
   }),
 }), login);
 app.post('/signup', celebrate({

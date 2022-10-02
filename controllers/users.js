@@ -33,7 +33,8 @@ const createUser = (req, res, next) => {
             next(err);
           }
         });
-    });
+    })
+    .catch(next);
 };
 // Read all users
 const getUsers = (req, res, next) => {
